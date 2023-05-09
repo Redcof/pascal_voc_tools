@@ -4,6 +4,27 @@ import xml.etree.ElementTree as ET
 from voc_tools.annotation import Annotation
 
 
+def from_file(file: str):
+    """
+    Generate a list of Annotation objects for a given image or xml of a PASCAL VOC dataset
+    """
+    if file.endswith(".xml"):
+        return from_xml(file)
+    else:
+        return from_image(file)
+
+
+def from_image(image_file: str):
+    """
+    Generate a list of Annotation objects for a given image of a PASCAL VOC dataset
+    """
+    image_file = pathlib.Path(image_file)
+    parent_path = image_file.parents[1] / "Annotations"
+    file_name = image_file.name.replace(".jpeg", ".xml")
+    xml_file = str(parent_path / file_name)
+    return from_xml(xml_file)
+
+
 def from_xml(xml_file: str):
     """
     Generate a list of Annotation objects from a given VOC XML file
@@ -27,12 +48,23 @@ def from_xml(xml_file: str):
         yield single_annotation
 
 
-def from_directory(dir_path: str):
+def list_dir(dir_path: str, images=False, fullpath=True):
     """
-    Generate a list of Annotation object per file form a given directory
+    Generate a list of XML files form a given PASCAL VOC directory
     """
     dir_path = pathlib.Path(dir_path)
-    annotations_dir = dir_path / "Annotations"
+    annotations_dir = dir_path / ("JPEGImages" if images else "Annotations")
     for xml_file in os.listdir(str(annotations_dir)):
-        for annotation in from_xml(str(annotations_dir / xml_file)):
+        if fullpath:
+            yield str(annotations_dir / xml_file)
+        else:
+            yield (annotations_dir / xml_file).name
+
+
+def from_dir(dir_path: str):
+    """
+    Generate a list of Annotation object per file form a given PASCAL VOC directory
+    """
+    for xml_file in list_dir(dir_path):
+        for annotation in from_xml(xml_file):
             yield annotation
