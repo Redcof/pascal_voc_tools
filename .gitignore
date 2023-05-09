@@ -1,0 +1,5 @@
+/.idea
+!.gitignore
+/build/
+/dist/
+/*.egg-info
