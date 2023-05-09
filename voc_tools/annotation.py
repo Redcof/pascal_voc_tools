@@ -83,7 +83,7 @@ class ABCDataset:
         return self
 
     def class_names(self):
-        class_name_idx = Annotation.csv_header().index('class_name')
+        class_name_idx = Annotation.raw_attributes().index('class_name')
         return set(self.meta[:, class_name_idx])
 
     def to_csv(self, path_to_csv, write_mode="w"):

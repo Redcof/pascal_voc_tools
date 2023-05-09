@@ -25,7 +25,7 @@ class MyTestCase(unittest.TestCase):
             print(anno.csv())
         print(Annotation.csv_header())
 
-        VOCDataset(str(dataset_path)).train.load().to_csv(str(dataset_path / "train.csv"))
+        print(VOCDataset(str(dataset_path)).train.load().to_csv(str(dataset_path / "train.csv")).class_names())
 
 
 if __name__ == '__main__':
