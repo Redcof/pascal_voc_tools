@@ -74,7 +74,7 @@ class ABCDataset:
 
     def load(self):
         from voc_tools.reader import from_dir
-        self.meta = np.array([anno.csv().split() for anno in from_dir(self.dataset_path)], dtype='object')
+        self.meta = np.array([anno.raw() for anno in from_dir(self.dataset_path)], dtype='object')
         return self
 
     def unload(self):
