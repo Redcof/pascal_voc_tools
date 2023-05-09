@@ -20,8 +20,8 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    install_requires=['lxml'],
+    install_requires=['lxml', 'numpy'],
     version_config=True,
-    version="0.1.0"
+    version="0.2.0"
     # setup_requires=["setuptools-git-versioning"]
 )

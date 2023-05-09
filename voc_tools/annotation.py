@@ -1,3 +1,8 @@
+import os
+
+import numpy as np
+
+
 class Annotation:
     def __init__(self, filename, xmin, ymin, xmax, ymax, center_x, center_y, class_name):
         self._xmin, self._ymin, self._xmax, self._ymax, self._center_x, self._center_y, self._class_name = (
@@ -40,25 +45,46 @@ class Annotation:
         return self._class_name
 
     def __str__(self):
-        return "file:{},xmin:{},ymin:{},xmax:{},ymax:{},center_x:{},center_y:{},class_name:{}".format(
-            self._filename, self._xmin, self._ymin, self._xmax, self._ymax, self._center_x, self._center_y,
-            self._class_name
-        )
+        s = ""
+        for k, v in zip(self.raw_attributes(), self.raw()):
+            s = "{}{}:{},".format(s, k, v)
+        return s.strip(",")
 
-    @classmethod
-    def csv_header(cls):
-        return "file,xmin,ymin,xmax,ymax,center_x,center_y,class_name"
+    @staticmethod
+    def csv_header():
+        return ",".join(Annotation.raw_attributes())
 
     def csv(self):
-        return "{},{},{},{},{},{},{},{}".format(
-            self._filename, self._xmin, self._ymin, self._xmax, self._ymax, self._center_x, self._center_y,
-            self._class_name
-        )
+        return "{},{},{},{},{},{},{},{}".format(*self.raw())
+
+    @staticmethod
+    def raw_attributes():
+        return "file", "xmin", "ymin", "xmax", "ymax", "center_x", "center_y", "class_name"
+
+    def raw(self):
+        return (self._filename, self._xmin, self._ymin, self._xmax, self._ymax, self._center_x, self._center_y,
+                self._class_name
+                )
 
 
-class VOCDataset:
+class ABCDataset:
     def __init__(self, dataset_path):
         self.dataset_path = dataset_path
+        self.meta = np.array([], dtype='object')
+
+    def load(self):
+        from voc_tools.reader import from_dir
+        self.meta = np.array([anno.csv().split() for anno in from_dir(self.dataset_path)], dtype='object')
+        return self
+
+    def unload(self):
+        del self.meta
+        self.meta = np.array([], dtype='object')
+        return self
+
+    def class_names(self):
+        class_name_idx = Annotation.csv_header().index('class_name')
+        return set(self.meta[:, class_name_idx])
 
     def to_csv(self, path_to_csv, write_mode="w"):
         """
@@ -69,3 +95,11 @@ class VOCDataset:
             csv_fp.write("{}\n".format(Annotation.csv_header()))
             for anno in from_dir(self.dataset_path):
                 csv_fp.write("{}\n".format(anno.csv()))
+        return self
+
+
+class VOCDataset:
+    def __init__(self, dataset_path):
+        self.dataset_path = dataset_path
+        self.train = ABCDataset(os.path.join(self.dataset_path, "train"))
+        self.test = ABCDataset(os.path.join(self.dataset_path, "test"))
