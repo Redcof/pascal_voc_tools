@@ -7,7 +7,7 @@ here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
-    name='pascal-voc-tools',
+    name='express-pascal-voc-tools',
     description="A tool for creating, reading and visualizing Pascal VOC annotations",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -16,11 +16,12 @@ setup(
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: Proprietary Internal Software",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
     install_requires=['lxml'],
     version_config=True,
+    version="0.0.1"
     # setup_requires=["setuptools-git-versioning"]
 )
