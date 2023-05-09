@@ -25,17 +25,18 @@ def from_image(image_file: str):
     return from_xml(xml_file)
 
 
-def from_xml(xml_file: str):
+def from_xml(xml_file: str, empty_placeholder="NULL"):
     """
     Generate a list of Annotation objects from a given VOC XML file
     """
     tree = ET.parse(xml_file)
     root = tree.getroot()
 
-    list_with_all_boxes = []
+    no_threat = True
 
     filename = root.find('filename').text
     for boxes in root.iter('object'):
+        no_threat = False
         class_ = boxes.find("name").text
         ymin = int(boxes.find("bndbox/ymin").text)
         xmin = int(boxes.find("bndbox/xmin").text)
@@ -46,6 +47,8 @@ def from_xml(xml_file: str):
 
         single_annotation = Annotation(filename, xmin, ymin, xmax, ymax, cx, cy, class_)
         yield single_annotation
+    if no_threat:
+        yield Annotation(filename, 0, 0, 0, 0, 0, 0, empty_placeholder)
 
 
 def list_dir(dir_path: str, images=False, fullpath=True):

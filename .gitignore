@@ -3,3 +3,4 @@
 /build/
 /dist/
 /*.egg-info
+/voc_tools/unittest/sixray_data/train/train.csv
