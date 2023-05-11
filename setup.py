@@ -22,6 +22,6 @@ setup(
     python_requires='>=3.6',
     install_requires=['lxml', 'numpy'],
     version_config=True,
-    version="0.4.0"
+    version="0.5.0"
     # setup_requires=["setuptools-git-versioning"]
 )
