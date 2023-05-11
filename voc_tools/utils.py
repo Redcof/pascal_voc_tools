@@ -163,6 +163,11 @@ class Dataset(ABCDataset):
         self.meta = np.array([], dtype='object')
         return self
 
+    def fetch(self):
+        from voc_tools.reader import from_dir
+        for anno in from_dir(self.dataset_path):
+            yield anno
+
     def class_names(self):
         class_name_idx = Annotation.raw_attributes().index('class_name')
         return set(self.meta[:, class_name_idx])

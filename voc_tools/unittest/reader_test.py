@@ -38,7 +38,11 @@ class MyTestCase(unittest.TestCase):
 
         voc_caption_data = VOCDataset(str(dataset_path), caption_support=True)
         for caption in voc_caption_data.train.caption.fetch():
-            print(caption.csv())
+            print(caption)
+
+        for anno in voc_caption_data.train.fetch():
+            print(anno)
+
         voc_caption_data.train.caption.to_csv(str(dataset_path / "captions.csv"))
 
 
