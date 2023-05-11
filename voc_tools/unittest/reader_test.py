@@ -31,7 +31,7 @@ class MyTestCase(unittest.TestCase):
             print(str(anno))
         for anno in voc_reader.from_file(r"sixray_data\train\Annotations\P00002.xml"):
             print(anno.csv())
-        for anno in voc_reader.from_dir(str(dataset_path / "train")):
+        for anno in voc_reader.from_dir(str(dataset_path / "train"), bulk=False):
             print(anno.csv())
         self.assertEqual("file,xmin,ymin,xmax,ymax,center_x,center_y,class_name", Annotation.csv_header())
 
@@ -56,6 +56,10 @@ class MyTestCase(unittest.TestCase):
         shape2 = (482, 801, 3)
         self.assertEqual(shape1, shape2)
         # see_jpeg(r"sixray_data\train\JPEGImages\P00002.jpg")
+
+        # path = r"C:\Users\--\OneDrive - -- Group\Documents\Projects\Dataset\Sixray_easy"
+        # VOCDataset(path).train.to_csv("sixray_train.csv")
+        # VOCDataset(path).test.to_csv("sixray_test.csv")
 
 
 if __name__ == '__main__':

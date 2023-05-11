@@ -176,13 +176,13 @@ class CaptionDataset(ABCDataset):
     def __init__(self, dataset_path):
         super().__init__(dataset_path)
 
-    def fetch(self):
+    def fetch(self, bulk=True):
         """
         Generate Caption object
         """
         from voc_tools.reader import caption_from_dir
 
-        for caption in caption_from_dir(self.dataset_path):
+        for caption in caption_from_dir(self.dataset_path, bulk=bulk):
             yield caption
 
     def to_csv(self, path_to_csv, write_mode="w"):
@@ -192,7 +192,7 @@ class CaptionDataset(ABCDataset):
         from voc_tools.reader import caption_from_dir
         with open(path_to_csv, write_mode) as csv_fp:
             csv_fp.write("{}\n".format(Caption.csv_header()))
-            for caption in caption_from_dir(self.dataset_path):
+            for caption in caption_from_dir(self.dataset_path, bulk=False):
                 csv_fp.write("{}\n".format(caption.csv()))
         return self
 
@@ -211,7 +211,7 @@ class Dataset(ABCDataset):
     def load(self):
         if not self.loaded:
             from voc_tools.reader import from_dir
-            self.meta = np.array([anno.raw() for anno in from_dir(self.dataset_path)], dtype='object')
+            self.meta = np.array([anno.raw() for anno in from_dir(self.dataset_path, bulk=False)], dtype='object')
             self.loaded = True
         return self
 
@@ -221,10 +221,14 @@ class Dataset(ABCDataset):
         self.loaded = False
         return self
 
-    def fetch(self):
+    def fetch(self, bulk=True):
         from voc_tools.reader import from_dir
-        for anno in from_dir(self.dataset_path):
-            yield anno, self.get_image(anno.filename)
+        for anno in from_dir(self.dataset_path, bulk=bulk):
+            if bulk:
+                yield anno, self.get_image(anno[0].filename)
+            else:
+                yield anno, self.get_image(anno.filename)
+
 
     def class_names(self):
         if not self.loaded:
@@ -250,7 +254,7 @@ class Dataset(ABCDataset):
         with open(path_to_csv, write_mode) as csv_fp:
             csv_fp.write("{}".format(Annotation.csv_header()))
             csv_fp.write("{}\n".format(JPEG.csv_header().replace("file", "")))
-            for anno in from_dir(self.dataset_path):
+            for anno in from_dir(self.dataset_path, bulk=False):
                 csv_fp.write("{},".format(anno.csv()))
                 csv_fp.write(",".join(self.get_image_meta(anno.filename)))
                 csv_fp.write("\n")

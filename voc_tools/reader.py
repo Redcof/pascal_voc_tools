@@ -87,13 +87,16 @@ def list_dir(dir_path: str, dir_flag=VOC_XMLS, images=False, fullpath=True):
             yield (annotations_dir / file_item).name
 
 
-def from_dir(dir_path: str):
+def from_dir(dir_path: str, bulk=True):
     """
     Generate a list of Annotation object per file form a given PASCAL VOC directory
     """
     for xml_file in list_dir(dir_path):
-        for annotation in from_xml(xml_file):
-            yield annotation
+        if bulk:
+            yield list(from_xml(xml_file))
+        else:
+            for annotation in from_xml(xml_file):
+                yield annotation
 
 
 def caption_from_file(file_path: str, empty_placeholder="NULL"):
@@ -114,10 +117,13 @@ def caption_from_file(file_path: str, empty_placeholder="NULL"):
         yield Caption(filename, "ERROR:{}".format(e))
 
 
-def caption_from_dir(dir_path: str):
+def caption_from_dir(dir_path: str, bulk=True):
     """
     Generate a list of captions object per file form a given directory
     """
     for file in list_dir(dir_path, dir_flag=VOC_CAPTIONS):
-        for caption in caption_from_file(file):
-            yield caption
+        if bulk:
+            yield list(caption_from_file(file))
+        else:
+            for caption in caption_from_file(file):
+                yield caption
