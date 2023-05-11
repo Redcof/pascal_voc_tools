@@ -72,9 +72,12 @@ dataset_path = "/my_dataset"
 # initialize a dataset
 my_dataset = VOCDataset(dataset_path)
 
+# fetch annotation bulk
+for annotations, jpeg in my_dataset.train.fetch():
+    print(annotations[0].filename, jpeg.image.shape)
 # fetch annotation
-for anno in my_dataset.train.fetch():
-    print(anno)
+for anno, jpeg in my_dataset.train.fetch(bulk=False):
+    print(anno, jpeg.image.shape)
 
 # parse the annotations into memory for train dataset
 my_dataset.train.load()
@@ -137,11 +140,26 @@ from voc_tools.utils import VOCDataset
 dataset_path = "/my_dataset"
 voc_caption_data = VOCDataset(dataset_path, caption_support=True)  # init dataset with caption
 
+# read caption bulk
+for captions in voc_caption_data.train.caption.fetch():
+    print(captions[0].raw())
+
 # read caption one by one
-for caption in voc_caption_data.train.caption.fetch():
+for caption in voc_caption_data.train.caption.fetch(bulk=False):
     print(caption.raw())
 # save captions to a CSV
 voc_caption_data.train.caption.to_csv("train_captions.csv")
+```
+
+### Visualize
+
+```python
+from voc_tools.visulizer import from_jpeg, see_jpeg
+
+jpeg = from_jpeg(r"sixray_data\train\JPEGImages\P00002.jpg")
+jpeg.see()
+# OR
+see_jpeg(r"sixray_data\train\JPEGImages\P00002.jpg")
 ```
 
 # Collaborate
