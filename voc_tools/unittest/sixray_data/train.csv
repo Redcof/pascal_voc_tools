@@ -1,6 +1,6 @@
-file,xmin,ymin,xmax,ymax,center_x,center_y,class_name
-P00002.jpg,274,232,610,460,442.0,346.0,knife
-P00002.jpg,225,334,591,465,408.0,399.5,knife
-P00003.jpg,858,121,918,321,888.0,221.0,knife
-P00004.jpg,83,73,133,425,108.0,249.0,knife
-P00004.jpg,1,162,343,318,172.0,240.0,knife
+file,xmin,ymin,xmax,ymax,center_x,center_y,class_name,height,width,channels
+P00002.jpg,274,232,610,460,442.0,346.0,knife,482,801,3
+P00002.jpg,225,334,591,465,408.0,399.5,knife,482,801,3
+P00003.jpg,858,121,918,321,888.0,221.0,knife,640,1024,3
+P00004.jpg,83,73,133,425,108.0,249.0,knife,571,649,3
+P00004.jpg,1,162,343,318,172.0,240.0,knife,571,649,3

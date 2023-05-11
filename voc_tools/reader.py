@@ -2,6 +2,7 @@ import os
 import pathlib
 import xml.etree.ElementTree as ET
 
+from voc_tools.constants import VOC_XMLS, VOC_IMAGES, VOC_CAPTIONS
 from voc_tools.utils import Annotation, Caption
 
 
@@ -14,10 +15,10 @@ def from_file(file: str):
         return from_xml(file)
     elif file.endswith(".txt"):
         return caption_from_file(file)
-    elif file.endswith(".jpeg"):
+    elif file.endswith(".jpeg") or file.endswith(".jpg"):
         return from_image(file)
     else:
-        raise ValueError("Unsupported file format.")
+        raise ValueError("Unsupported file format")
 
 
 def from_image(image_file: str):
@@ -26,7 +27,7 @@ def from_image(image_file: str):
     """
     image_file = pathlib.Path(image_file)
     parent_path = image_file.parents[1] / "Annotations"
-    file_name = image_file.name.replace(".jpeg", ".xml")
+    file_name = image_file.name.replace(".jpeg", ".xml").replace(".jpg", ".xml")
     xml_file = str(parent_path / file_name)
     return from_xml(xml_file)
 
@@ -59,11 +60,6 @@ def from_xml(xml_file: str, empty_placeholder="NULL"):
             yield Annotation(filename, 0, 0, 0, 0, 0, 0, empty_placeholder)
     except Exception as e:
         yield Annotation(filename, 0, 0, 0, 0, 0, 0, "ERROR:{}".format(e))
-
-
-VOC_IMAGES = 1
-VOC_XMLS = 2
-VOC_CAPTIONS = 3
 
 
 def list_dir(dir_path: str, dir_flag=VOC_XMLS, images=False, fullpath=True):

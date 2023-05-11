@@ -1,7 +1,33 @@
 import os
+import pathlib
 from abc import ABC, abstractmethod
 
+import cv2
 import numpy as np
+
+from voc_tools.constants import VOC_IMAGES, VOC_CAPTIONS, VOC_XMLS
+
+
+def path_convert(file: str, converter_flag: int):
+    """
+    Convert any file path to a required file path
+    :param file: A path to xml, jpeg or txt file
+    :param converter_flag:
+    :return: Converted path
+    """
+    assert file.endswith(".xml") or file.endswith(".txt") or file.endswith(".jpeg") or file.endswith(".jpg"), (
+        "Unsupported file format")
+    assert converter_flag in [VOC_IMAGES, VOC_CAPTIONS, VOC_XMLS], "Unsupported converter_flag"
+    file = pathlib.Path(file)
+    filename = file.name
+    parent_path = file.parents[1]
+    if converter_flag == VOC_IMAGES:
+        path = parent_path / "JPEGImages" / filename
+    if converter_flag == VOC_XMLS:
+        path = parent_path / "Annotations" / filename
+    if converter_flag == VOC_CAPTIONS:
+        path = parent_path / "text" / filename
+    return str(path)
 
 
 # ################################################
@@ -33,6 +59,33 @@ class Atomic:
     def raw_attributes(cls):
         """Return raw tuple of strings(to be used as key per values). A single method instance is required per class"""
         ...
+
+
+class JPEG(Atomic):
+
+    def raw(self):
+        return self._filename, *self._cv_image.shape
+
+    @classmethod
+    def raw_attributes(cls):
+        return "file", "height", "width", "channels"
+
+    def __init__(self, filename):
+        filename = path_convert(filename, VOC_IMAGES)
+        self._filename = pathlib.Path(filename).name
+        self._cv_image = cv2.imread(filename)
+
+    @property
+    def filename(self):
+        return self._filename
+
+    @property
+    def image(self):
+        return self._cv_image
+
+    def see(self):
+        cv2.imshow(self.filename, self._cv_image)
+        cv2.waitKey(-1)
 
 
 class Annotation(Atomic):
@@ -150,27 +203,44 @@ class Dataset(ABCDataset):
         self.dataset_path = dataset_path
         self.caption_support = caption_support
         self.meta = np.array([], dtype='object')
+        self.image_cache: JPEG = None
+        self.loaded = False
         if caption_support:
             self.caption = CaptionDataset(dataset_path)
 
     def load(self):
-        from voc_tools.reader import from_dir
-        self.meta = np.array([anno.raw() for anno in from_dir(self.dataset_path)], dtype='object')
+        if not self.loaded:
+            from voc_tools.reader import from_dir
+            self.meta = np.array([anno.raw() for anno in from_dir(self.dataset_path)], dtype='object')
+            self.loaded = True
         return self
 
     def unload(self):
         del self.meta
         self.meta = np.array([], dtype='object')
+        self.loaded = False
         return self
 
     def fetch(self):
         from voc_tools.reader import from_dir
         for anno in from_dir(self.dataset_path):
-            yield anno
+            yield anno, self.get_image(anno.filename)
 
     def class_names(self):
+        if not self.loaded:
+            self.load()
         class_name_idx = Annotation.raw_attributes().index('class_name')
-        return set(self.meta[:, class_name_idx])
+        return tuple(set(self.meta[:, class_name_idx]))
+
+    def get_image(self, filename):
+        return JPEG(os.path.join(self.dataset_path, "JPEGImages", filename))
+
+    def get_image_meta(self, filename):
+        if self.image_cache is None or filename != self.image_cache.filename:
+            # save the image
+            self.image_cache = self.get_image(filename)
+            # if a newer appear, re
+        return self.image_cache.csv().split(",")[1:]
 
     def to_csv(self, path_to_csv, write_mode="w"):
         """
@@ -178,9 +248,12 @@ class Dataset(ABCDataset):
         """
         from voc_tools.reader import from_dir
         with open(path_to_csv, write_mode) as csv_fp:
-            csv_fp.write("{}\n".format(Annotation.csv_header()))
+            csv_fp.write("{}".format(Annotation.csv_header()))
+            csv_fp.write("{}\n".format(JPEG.csv_header().replace("file", "")))
             for anno in from_dir(self.dataset_path):
-                csv_fp.write("{}\n".format(anno.csv()))
+                csv_fp.write("{},".format(anno.csv()))
+                csv_fp.write(",".join(self.get_image_meta(anno.filename)))
+                csv_fp.write("\n")
         return self
 
 

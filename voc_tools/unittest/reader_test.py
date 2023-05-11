@@ -3,6 +3,7 @@ import unittest
 
 from voc_tools import reader as voc_reader
 from voc_tools.utils import Annotation, VOCDataset
+from voc_tools.visulizer import from_jpeg, see_jpeg
 
 
 class MyTestCase(unittest.TestCase):
@@ -34,16 +35,27 @@ class MyTestCase(unittest.TestCase):
             print(anno.csv())
         self.assertEqual("file,xmin,ymin,xmax,ymax,center_x,center_y,class_name", Annotation.csv_header())
 
-        print(VOCDataset(str(dataset_path)).train.load().to_csv(str(dataset_path / "train.csv")).class_names())
+        my_voc = VOCDataset(str(dataset_path))
+        my_voc.train.load()
+        my_voc.train.unload()
+        my_voc.train.to_csv(str(dataset_path / "train.csv"))
+        classes1 = my_voc.train.class_names()
+        classes2 = "knife",
+        self.assertEqual(classes2, classes1)
 
         voc_caption_data = VOCDataset(str(dataset_path), caption_support=True)
         for caption in voc_caption_data.train.caption.fetch():
             print(caption)
 
-        for anno in voc_caption_data.train.fetch():
-            print(anno)
+        for anno, jpeg in voc_caption_data.train.fetch():
+            print(anno, jpeg)
 
         voc_caption_data.train.caption.to_csv(str(dataset_path / "captions.csv"))
+        jpg = from_jpeg(r"sixray_data\train\JPEGImages\P00002.jpg")
+        shape1 = jpg.image.shape
+        shape2 = (482, 801, 3)
+        self.assertEqual(shape1, shape2)
+        # see_jpeg(r"sixray_data\train\JPEGImages\P00002.jpg")
 
 
 if __name__ == '__main__':

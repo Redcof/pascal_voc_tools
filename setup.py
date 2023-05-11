@@ -20,8 +20,8 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    install_requires=['lxml', 'numpy'],
+    install_requires=['lxml', 'numpy', 'opencv-python'],
     version_config=True,
-    version="0.5.0"
+    version="0.5.1"
     # setup_requires=["setuptools-git-versioning"]
 )
