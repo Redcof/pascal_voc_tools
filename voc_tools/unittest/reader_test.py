@@ -17,22 +17,25 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(Annotation.csv_header(), "file,xmin,ymin,xmax,ymax,center_x,center_y,class_name",
                          msg="CSV header mismatch")
 
-        ["file:P00002.jpg,xmin:274,ymin:232,xmax:610,ymax:460,center_x:442.0,center_y:346.0,class_name:knife",
-         "file:P00002.jpg,xmin:225,ymin:334,xmax:591,ymax:465,center_x:408.0,center_y:399.5,class_name:knife", ]
-        ["P00002.jpg,274,232,610,460,442.0,346.0,knife",
-         "P00002.jpg,225,334,591,465,408.0,399.5,knife",
-         "P00002.jpg,274,232,610,460,442.0,346.0,knife",
-         "P00002.jpg,225,334,591,465,408.0,399.5,knife", ]
-        "P00003.jpg,858,121,918,321,888.0,221.0,knife",
-        "P00004.jpg,83,73,133,425,108.0,249.0,knife",
-        "P00004.jpg,1,162,343,318,172.0,240.0,knife",
+        test1 = ["file:P00002.jpg,xmin:274,ymin:232,xmax:610,ymax:460,center_x:442.0,center_y:346.0,class_name:knife",
+                 "file:P00002.jpg,xmin:225,ymin:334,xmax:591,ymax:465,center_x:408.0,center_y:399.5,class_name:knife"]
 
-        for anno in voc_reader.from_file(r"sixray_data\train\JPEGImages\P00002.jpeg"):
-            print(str(anno))
-        for anno in voc_reader.from_file(r"sixray_data\train\Annotations\P00002.xml"):
-            print(anno.csv())
-        for anno in voc_reader.from_dir(str(dataset_path / "train"), bulk=False):
-            print(anno.csv())
+        test2 = [
+            "file:P00002.jpg,xmin:274,ymin:232,xmax:610,ymax:460,center_x:442.0,center_y:346.0,class_name:knife",
+            "file:P00002.jpg,xmin:225,ymin:334,xmax:591,ymax:465,center_x:408.0,center_y:399.5,class_name:knife",
+            "file:P00003.jpg,xmin:858,ymin:121,xmax:918,ymax:321,center_x:888.0,center_y:221.0,class_name:knife",
+            "file:P00004.jpg,xmin:83,ymin:73,xmax:133,ymax:425,center_x:108.0,center_y:249.0,class_name:knife",
+            "file:P00004.jpg,xmin:1,ymin:162,xmax:343,ymax:318,center_x:172.0,center_y:240.0,class_name:knife",
+        ]
+
+        for te, anno in zip(test1, voc_reader.from_file(r"sixray_data\train\JPEGImages\P00002.jpeg")):
+            self.assertEqual(te, str(anno))
+        for te, anno in zip(test1, voc_reader.from_file(r"sixray_data\train\Annotations\P00002.xml")):
+            self.assertEqual(te, str(anno))
+        for te, anno in zip(test1, voc_reader.from_file(r"sixray_data\train\text\P00002.txt")):
+            self.assertEqual(te, str(anno))
+        for te, anno in zip(test2, voc_reader.from_dir(str(dataset_path / "train"), bulk=False)):
+            self.assertEqual(te, str(anno))
         self.assertEqual("file,xmin,ymin,xmax,ymax,center_x,center_y,class_name", Annotation.csv_header())
 
         my_voc = VOCDataset(str(dataset_path))
@@ -44,11 +47,12 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(classes2, classes1)
 
         voc_caption_data = VOCDataset(str(dataset_path), caption_support=True)
-        for caption in voc_caption_data.train.caption.fetch():
-            print(caption)
+        for length, captions in zip([4, 2, 1], voc_caption_data.train.caption.fetch(bulk=True)):
+            self.assertEqual(length, len(captions))
 
-        for anno, jpeg in voc_caption_data.train.fetch():
-            print(anno, jpeg)
+        l = [annotations[0].class_name for annotations, image in VOCDataset(str(dataset_path)).train.fetch(bulk=True)]
+        test3 = ['knife', 'knife', 'knife']
+        self.assertEqual(test3, l)
 
         voc_caption_data.train.caption.to_csv(str(dataset_path / "captions.csv"))
         jpg = from_jpeg(r"sixray_data\train\JPEGImages\P00002.jpg")

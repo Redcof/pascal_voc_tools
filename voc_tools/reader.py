@@ -14,11 +14,22 @@ def from_file(file: str):
     if file.endswith(".xml"):
         return from_xml(file)
     elif file.endswith(".txt"):
-        return caption_from_file(file)
+        return from_caption(file)
     elif file.endswith(".jpeg") or file.endswith(".jpg"):
         return from_image(file)
     else:
         raise ValueError("Unsupported file format")
+
+
+def from_caption(txt_file: str):
+    """
+    Generate a list of Annotation objects for a given caption of a PASCAL VOC dataset
+    """
+    txt_file = pathlib.Path(txt_file)
+    parent_path = txt_file.parents[1] / "Annotations"
+    file_name = txt_file.name.replace(".txt", ".xml")
+    xml_file = str(parent_path / file_name)
+    return from_xml(xml_file)
 
 
 def from_image(image_file: str):
