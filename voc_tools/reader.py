@@ -3,7 +3,7 @@ import pathlib
 import xml.etree.ElementTree as ET
 
 from voc_tools.constants import VOC_XMLS, VOC_IMAGES, VOC_CAPTIONS
-from voc_tools.utils import Annotation, Caption
+from voc_tools.utils import Annotation, Caption, Dataset
 
 
 def from_file(file: str):
@@ -26,7 +26,7 @@ def from_caption(txt_file: str):
     Generate a list of Annotation objects for a given caption of a PASCAL VOC dataset
     """
     txt_file = pathlib.Path(txt_file)
-    parent_path = txt_file.parents[1] / "Annotations"
+    parent_path = txt_file.parents[1] / Dataset.ANNO_DIR
     file_name = txt_file.name.replace(".txt", ".xml")
     xml_file = str(parent_path / file_name)
     return from_xml(xml_file)
@@ -37,7 +37,7 @@ def from_image(image_file: str):
     Generate a list of Annotation objects for a given image of a PASCAL VOC dataset
     """
     image_file = pathlib.Path(image_file)
-    parent_path = image_file.parents[1] / "Annotations"
+    parent_path = image_file.parents[1] / Dataset.ANNO_DIR
     file_name = image_file.name.replace(".jpeg", ".xml").replace(".jpg", ".xml")
     xml_file = str(parent_path / file_name)
     return from_xml(xml_file)
@@ -90,7 +90,8 @@ def list_dir(dir_path: str, dir_flag=VOC_XMLS, images=False, fullpath=True):
     if images:
         dir_flag = VOC_IMAGES
     annotations_dir = dir_path / (
-        "JPEGImages" if dir_flag == VOC_IMAGES else ("Annotations" if dir_flag == VOC_XMLS else "text"))
+        Dataset.IMAGE_DIR if dir_flag == VOC_IMAGES else (
+            Dataset.ANNO_DIR if dir_flag == VOC_XMLS else Dataset.CAPTION_DIR))
     for file_item in os.listdir(str(annotations_dir)):
         if fullpath:
             yield str(annotations_dir / file_item)

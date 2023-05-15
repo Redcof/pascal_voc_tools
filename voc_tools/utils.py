@@ -22,11 +22,11 @@ def path_convert(file: str, converter_flag: int):
     filename = file.name
     parent_path = file.parents[1]
     if converter_flag == VOC_IMAGES:
-        path = parent_path / "JPEGImages" / filename
+        path = parent_path / Dataset.IMAGE_DIR / filename
     if converter_flag == VOC_XMLS:
-        path = parent_path / "Annotations" / filename
+        path = parent_path / Dataset.ANNO_DIR / filename
     if converter_flag == VOC_CAPTIONS:
-        path = parent_path / "text" / filename
+        path = parent_path / Dataset.CAPTION_DIR / filename
     return str(path)
 
 
@@ -198,6 +198,10 @@ class CaptionDataset(ABCDataset):
 
 
 class Dataset(ABCDataset):
+    IMAGE_DIR = "JPEGImages"
+    ANNO_DIR = "Annotations"
+    CAPTION_DIR = "captions"
+
     def __init__(self, dataset_path, caption_support=False):
         super().__init__(dataset_path)
         self.dataset_path = dataset_path
@@ -229,7 +233,6 @@ class Dataset(ABCDataset):
             else:
                 yield anno, self.get_image(anno.filename)
 
-
     def class_names(self):
         if not self.loaded:
             self.load()
@@ -237,7 +240,7 @@ class Dataset(ABCDataset):
         return tuple(set(self.meta[:, class_name_idx]))
 
     def get_image(self, filename):
-        return JPEG(os.path.join(self.dataset_path, "JPEGImages", filename))
+        return JPEG(os.path.join(self.dataset_path, Dataset.IMAGE_DIR, filename))
 
     def get_image_meta(self, filename):
         if self.image_cache is None or filename != self.image_cache.filename:

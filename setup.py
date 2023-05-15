@@ -22,6 +22,6 @@ setup(
     python_requires='>=3.6',
     install_requires=['lxml', 'numpy', 'opencv-python'],
     version_config=True,
-    version="0.7.0"
+    version="0.7.1"
     # setup_requires=["setuptools-git-versioning"]
 )
