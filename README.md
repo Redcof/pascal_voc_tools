@@ -162,6 +162,25 @@ jpeg.see()
 see_jpeg(r"sixray_data\train\JPEGImages\P00002.jpg")
 ```
 
+### Load not PascalVOC dataset
+
+```python
+import pathlib
+from voc_tools.constants import VOC_IMAGES
+from voc_tools.reader import list_dir
+from voc_tools.utils import Dataset, VOCDataset
+
+dataset = pathlib.Path(r"path/to/dataset")
+# set global flags
+Dataset.IMAGE_DIR = "images"  # Say, instead of 'JPEGImages', the images are stored in 'images' directory
+# reading filepaths
+file_paths = list(list_dir(str(dataset / "train"), dir_flag=VOC_IMAGES, fullpath=True))
+file_paths.extend(list(list_dir(str(dataset / "test"), dir_flag=VOC_IMAGES, fullpath=True)))
+
+# if you have captions stored in 'captions' directory
+voc_data = VOCDataset(dataset, caption_support=True)
+```
+
 # Collaborate
 
 GitHub: [https://github.com/Redcof/pascal_voc_tools.git](https://github.com/Redcof/pascal_voc_tools.git)
